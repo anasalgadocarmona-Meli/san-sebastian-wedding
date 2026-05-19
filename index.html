@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎊 San Sebastián Wedding — Accommodation Finder</title>
+  <style>
+    :root {
+      --rose:      #c9747a;
+      --dark-rose: #9e4f54;
+      --sage:      #6a9a6a;
+      --cream:     #fdf6f0;
+      --blush:     #f7e8e8;
+      --navy:      #2c3e50;
+      --gold:      #c8a96e;
+      --dark-gold: #8a6a30;
+      --slate:     #3d5068;
+      --border:    #e8d5d5;
+      --shadow:    rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--cream); color: var(--navy); min-height: 100vh; }
+
+    /* ── Header ─────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--dark-rose), var(--rose) 55%, var(--gold));
+      color: white; padding: 2rem 1.5rem 1.6rem; text-align: center;
+    }
+    header h1 { font-size: 1.8rem; letter-spacing: 2px; margin-bottom: 0.3rem; font-family: Georgia, serif; }
+    header p  { opacity: 0.88; font-style: italic; font-size: 0.95rem; }
+    .dates {
+      display: inline-block; margin-top: 0.6rem;
+      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px; padding: 0.28rem 1.1rem; font-size: 0.82rem; letter-spacing: 0.8px;
+    }
+
+    /* ── Legend ─────────────────────────────── */
+    .legend-bar {
+      background: var(--blush); border-bottom: 1px solid var(--border);
+      padding: 0.7rem 1.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem;
+      align-items: center; font-size: 0.82rem;
+    }
+    .legend-bar strong { color: var(--dark-rose); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 1px; }
+    .pill { display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 20px; padding: 0.22rem 0.75rem; font-size: 0.78rem; font-weight: 600; }
+    .pill-a  { background: #f7e0e1; color: var(--dark-rose); }
+    .pill-b  { background: #e0f0e0; color: #2a6a2a; }
+    .pill-4p { background: #e8eef8; color: #2a4a8a; }
+    .pill-2p { background: #f0e8f8; color: #5a2a8a; }
+    .sep     { color: #ccc; }
+
+    /* ── Filters ─────────────────────────────── */
+    .filters {
+      margin: 1.2rem 1rem 0; background: white; border: 1px solid var(--border);
+      border-radius: 14px; padding: 1rem 1.2rem; box-shadow: 0 2px 10px var(--shadow);
+    }
+    .filters-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--rose); margin-bottom: 0.8rem; font-weight: 700; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.8rem 1.5rem; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.35rem; min-width: 130px; }
+    .filter-group label { font-size: 0.72rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.8px; }
+    .filter-group select { border: 1px solid var(--border); border-radius: 8px; padding: 0.35rem 0.55rem; font-size: 0.82rem; color: var(--navy); background: #fafafa; cursor: pointer; outline: none; }
+    .filter-group select:focus { border-color: var(--rose); }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .chip { padding: 0.25rem 0.75rem; border-radius: 16px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; user-select: none; }
+    .chip-all    { background: #f0f0f0; color: #555; }
+    .chip-all.active    { background: var(--rose); color: white; border-color: var(--rose); }
+    .chip-gros   { background: #deeaf5; color: #2a6093; }
+    .chip-gros.active   { background: #2a6093; color: white; border-color: #2a6093; }
+    .chip-centro { background: #e8f5de; color: #3d7a2a; }
+    .chip-centro.active { background: #3d7a2a; color: white; border-color: #3d7a2a; }
+    .chip-amara  { background: #ede8f5; color: #5a3d8a; }
+    .chip-amara.active  { background: #5a3d8a; color: white; border-color: #5a3d8a; }
+    .reset-btn { padding: 0.35rem 0.9rem; border: 1.5px solid var(--rose); border-radius: 8px; background: white; color: var(--rose); font-size: 0.78rem; font-weight: 700; cursor: pointer; align-self: flex-end; transition: all 0.15s; }
+    .reset-btn:hover { background: var(--rose); color: white; }
+    .results-count { font-size: 0.76rem; color: #999; margin-top: 0.6rem; font-style: italic; }
+
+    /* ── Section banners ─────────────────────── */
+    .section-banner {
+      margin: 1.5rem 1rem 0;
+      border-radius: 14px 14px 0 0;
+      padding: 1rem 1.4rem 0.9rem;
+      display: flex; align-items: center; gap: 0.9rem;
+    }
+    .section-banner .icon { font-size: 1.6rem; }
+    .section-banner .title { font-family: Georgia, serif; font-size: 1.2rem; font-weight: 700; }
+    .section-banner .sub   { font-size: 0.8rem; opacity: 0.8; margin-top: 0.15rem; }
+    .section-banner .count-badge {
+      margin-left: auto; border-radius: 20px; padding: 0.2rem 0.75rem;
+      font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+    }
+
+    /* Hotel banner — gold/slate */
+    .banner-hotel {
+      background: linear-gradient(135deg, var(--slate) 0%, #4a6080 60%, var(--dark-gold));
+      color: white;
+    }
+    .banner-hotel .count-badge { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.35); }
+
+    /* Apartment banner — rose */
+    .banner-apart {
+      background: linear-gradient(135deg, var(--dark-rose) 0%, var(--rose) 60%, var(--gold));
+      color: white;
+    }
+    .banner-apart .count-badge { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.35); }
+
+    /* ── Table wrapper ───────────────────────── */
+    .main { padding: 0 1rem 0.5rem; overflow-x: auto; }
+
+    table {
+      width: 100%; border-collapse: collapse; background: white;
+      border-radius: 0 0 14px 14px; overflow: hidden;
+      box-shadow: 0 4px 20px var(--shadow); font-size: 0.83rem;
+      margin-bottom: 0.3rem;
+    }
+
+    /* hotel table header */
+    .tbl-hotel thead tr { background: linear-gradient(90deg, var(--slate), #4a6a8a); color: white; }
+    /* apartment table header */
+    .tbl-apart thead tr { background: linear-gradient(90deg, var(--dark-rose), var(--rose)); color: white; }
+
+    th {
+      padding: 0.75rem 0.6rem; text-align: left; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700;
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    th.center { text-align: center; }
+    th .sort-icon { opacity: 0.45; margin-left: 3px; font-size: 0.65rem; }
+    th.sorted-asc  .sort-icon::after { content: ' ▲'; opacity: 1; }
+    th.sorted-desc .sort-icon::after { content: ' ▼'; opacity: 1; }
+    th:not(.sorted-asc):not(.sorted-desc) .sort-icon::after { content: ' ⇅'; }
+    th:hover { background: rgba(255,255,255,0.12); }
+
+    td { padding: 0.7rem 0.6rem; border-bottom: 1px solid #f0eaea; vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #f8f4fc; }
+    tbody tr.hidden { display: none; }
+
+    /* capacity stripe */
+    tbody tr[data-capacity="4"] td:first-child { border-left: 3px solid #2a4a8a; }
+    tbody tr[data-capacity="2"] td:first-child { border-left: 3px solid #5a2a8a; }
+
+    .prop-name { font-weight: 700; font-size: 0.88rem; }
+    .prop-name a { color: var(--dark-rose); text-decoration: none; }
+    .tbl-hotel .prop-name a { color: var(--slate); }
+    .prop-name a:hover { text-decoration: underline; }
+    .prop-sub  { font-size: 0.72rem; color: #aaa; margin-top: 0.1rem; }
+
+    .badge { display: inline-block; border-radius: 10px; padding: 0.15rem 0.55rem; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .badge-gros    { background: #deeaf5; color: #2a6093; }
+    .badge-centro  { background: #e8f5de; color: #3d7a2a; }
+    .badge-amara   { background: #ede8f5; color: #5a3d8a; }
+    .badge-apart   { background: #e8f5e8; color: #2a7a2a; }
+    .badge-hotel   { background: #e8edf5; color: #2a3a6a; }
+    .badge-pension { background: #f5f5e0; color: #6a6a00; }
+    .badge-cap4    { background: #e8eef8; color: #2a4a8a; }
+    .badge-cap2    { background: #f0e8f8; color: #5a2a8a; }
+
+    .dist-cell { font-size: 0.8rem; white-space: nowrap; }
+    .dist-bar  { height: 4px; border-radius: 2px; margin-top: 3px; max-width: 80px; }
+    .tbl-hotel .dist-bar { background: linear-gradient(90deg, var(--slate), var(--gold)); }
+    .tbl-apart .dist-bar { background: linear-gradient(90deg, var(--rose), var(--gold)); }
+
+    .rating { font-weight: 700; font-size: 0.85rem; display: inline-block; padding: 0.1rem 0.35rem; border-radius: 6px; white-space: nowrap; }
+    .r-high { background: #d4edda; color: #155724; }
+    .r-med  { background: #fff3cd; color: #856404; }
+    .r-none { color: #bbb; font-weight: 400; font-size: 0.72rem; }
+
+    .features { font-size: 0.75rem; color: #666; line-height: 1.5; }
+    .beds     { font-size: 0.77rem; color: #555; line-height: 1.4; }
+
+    .price-total { text-align: center; font-weight: 800; font-size: 0.95rem; color: var(--navy); white-space: nowrap; }
+    .col-a { background: rgba(158,79,84,0.04); text-align: center; }
+    .col-b { background: rgba(106,154,106,0.05); text-align: center; }
+
+    .price-val { font-weight: 800; font-size: 0.97rem; font-family: 'Courier New', monospace; white-space: nowrap; }
+    .price-val.a { color: var(--dark-rose); }
+    .price-val.b { color: var(--sage); }
+    .calc-note { font-size: 0.65rem; color: #bbb; margin-top: 0.1rem; }
+
+    .footnote { font-size: 0.67rem; color: rgba(255,255,255,0.7); display: block; font-weight: 400; }
+
+    tfoot td { background: #fafafa; padding: 0.55rem 0.6rem; font-size: 0.72rem; color: #999; font-style: italic; border-top: 1px solid #f0eaea; }
+
+    .no-results { text-align: center; padding: 2rem; color: #bbb; font-size: 0.88rem; display: none; }
+    .section-empty { display: none; text-align: center; padding: 1.2rem; color: #bbb; font-size: 0.82rem; font-style: italic; background: white; border-radius: 0 0 14px 14px; box-shadow: 0 4px 20px var(--shadow); margin-bottom: 0.3rem; }
+
+    footer { text-align: center; padding: 1.5rem; font-size: 0.74rem; color: #bbb; }
+
+    @media (max-width: 800px) {
+      header h1 { font-size: 1.4rem; }
+      th, td { padding: 0.55rem 0.4rem; }
+      table { font-size: 0.76rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <h1>🎊 San Sebastián Wedding</h1>
+  <p>Accommodation comparison · pick-up: <strong>Hotel María Cristina</strong></p>
+  <span class="dates">Thu 28 May → Sun 31 May 2026 &nbsp;·&nbsp; 3 nights</span>
+</header>
+
+<!-- Legend -->
+<div class="legend-bar">
+  <strong>Groups:</strong>
+  <span class="pill pill-a">🌸 Group A — Faarya &amp; Ravi &nbsp;(arrive Thu · 3 nights)</span>
+  <span class="pill pill-b">🌿 Group B — Ana &amp; Dany &nbsp;(arrive Fri · 2 nights)</span>
+  <span class="sep">|</span>
+  <span class="pill pill-4p">🏠 4-person apt: A = Total÷3 · B = Total÷6</span>
+  <span class="pill pill-2p">🛏️ 2-person: A = Total÷2 · B = Total÷3</span>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <div class="filters-title">🔍 Filter &amp; Sort</div>
+  <div class="filter-row">
+
+    <div class="filter-group">
+      <label>Neighbourhood</label>
+      <div class="filter-chips" id="neighFilter">
+        <span class="chip chip-all active" data-val="all">All</span>
+        <span class="chip chip-gros"   data-val="gros">Gros</span>
+        <span class="chip chip-centro" data-val="centro">Centro</span>
+        <span class="chip chip-amara"  data-val="amara">Amara</span>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label>Sort by</label>
+      <select id="sortSelect">
+        <option value="default">Default order</option>
+        <option value="price-a-asc">Group A price ↑ cheapest first</option>
+        <option value="price-a-desc">Group A price ↓ most expensive</option>
+        <option value="price-b-asc">Group B price ↑ cheapest first</option>
+        <option value="price-b-desc">Group B price ↓ most expensive</option>
+        <option value="dist-asc">Distance ↑ closest first</option>
+        <option value="dist-desc">Distance ↓ furthest first</option>
+        <option value="rating-desc">Rating ↓ best first</option>
+        <option value="total-asc">Total price ↑</option>
+        <option value="total-desc">Total price ↓</option>
+      </select>
+    </div>
+
+    <button class="reset-btn" onclick="resetFilters()">✕ Reset</button>
+  </div>
+  <div class="results-count" id="resultsCount">Showing all 9 options</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — HOTELS & PENSIONES
+══════════════════════════════════════════ -->
+<div class="section-banner banner-hotel" id="hotelBanner">
+  <span class="icon">🏨</span>
+  <div>
+    <div class="title">Hotels &amp; Pensiones</div>
+    <div class="sub">Individual rooms · each pair books separately · 2-person pricing</div>
+  </div>
+  <span class="count-badge" id="hotelCount">4 options</span>
+</div>
+
+<div class="main">
+  <div class="section-empty" id="hotelEmpty">No hotel options match the current filters.</div>
+  <table class="tbl-hotel" id="hotelTable">
+    <thead>
+      <tr>
+        <th data-sort="name" data-tbl="hotel">Property <span class="sort-icon"></span></th>
+        <th data-sort="type" data-tbl="hotel">Type <span class="sort-icon"></span></th>
+        <th data-sort="neigh" data-tbl="hotel" class="center">Area <span class="sort-icon"></span></th>
+        <th data-sort="dist" data-tbl="hotel" class="center">Dist. pick-up <span class="sort-icon"></span></th>
+        <th>Room</th>
+        <th data-sort="rating" data-tbl="hotel" class="center">Rating <span class="sort-icon"></span></th>
+        <th>Highlights</th>
+        <th data-sort="total" data-tbl="hotel" class="center">Total<br/><span class="footnote">3 nights · 2 ppl</span></th>
+        <th data-sort="price-a" data-tbl="hotel" class="center col-a">Group A / pp<br/><span class="footnote">Faarya &amp; Ravi</span></th>
+        <th data-sort="price-b" data-tbl="hotel" class="center col-b">Group B / pp<br/><span class="footnote">Ana &amp; Dany</span></th>
+      </tr>
+    </thead>
+    <tbody id="hotelBody">
+
+      <!-- Leonardo Hotel -->
+      <tr data-capacity="2" data-type="hotel" data-neigh="amara"
+          data-dist="2.0" data-rating="8.8" data-total="511" data-pa="256" data-pb="170">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/bed4u-san-sebastian.html" target="_blank">Leonardo Hotel San Sebastián</a></div>
+          <div class="prop-sub">Hotel ★★★★</div>
+        </td>
+        <td><span class="badge badge-hotel">Hotel ★★★★</span></td>
+        <td class="center"><span class="badge badge-amara">Amara</span></td>
+        <td class="dist-cell center">2.0 km<div class="dist-bar" style="width:40%"></div></td>
+        <td class="beds">Double room<br/>Private bathroom · AC</td>
+        <td class="center"><span class="rating r-high">8.8</span></td>
+        <td class="features">🏊 Rooftop pool · Gym<br/>Mediterranean restaurant · Bar<br/>Bus stop at door · 1.2 mi to beach</td>
+        <td class="price-total">€511</td>
+        <td class="col-a"><div class="price-val a">€256</div><div class="calc-note">511÷2</div></td>
+        <td class="col-b"><div class="price-val b">€170</div><div class="calc-note">511÷3</div></td>
+      </tr>
+
+      <!-- Enjoy Comfort -->
+      <tr data-capacity="2" data-type="other" data-neigh="gros"
+          data-dist="1.0" data-rating="8.4" data-total="520" data-pa="260" data-pb="173">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/enjoy-comfort.html" target="_blank">Enjoy Comfort</a></div>
+          <div class="prop-sub">Guest House</div>
+        </td>
+        <td><span class="badge badge-pension">Guest House</span></td>
+        <td class="center"><span class="badge badge-gros">Gros</span></td>
+        <td class="dist-cell center">1.0 km<div class="dist-bar" style="width:20%"></div></td>
+        <td class="beds">Double room<br/>Shared bathroom · parquet</td>
+        <td class="center"><span class="rating r-high">8.4</span></td>
+        <td class="features">5 min walk to beach 🏖️<br/>10 min to La Concha Bay<br/>Shared lounge · WiFi</td>
+        <td class="price-total">€520</td>
+        <td class="col-a"><div class="price-val a">€260</div><div class="calc-note">520÷2</div></td>
+        <td class="col-b"><div class="price-val b">€173</div><div class="calc-note">520÷3</div></td>
+      </tr>
+
+      <!-- Pensión Atxiki -->
+      <tr data-capacity="2" data-type="other" data-neigh="gros"
+          data-dist="0.5" data-rating="8.1" data-total="405" data-pa="203" data-pb="135">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/pension-atxiki.html" target="_blank">Pensión Atxiki</a></div>
+          <div class="prop-sub">Family-run pensión</div>
+        </td>
+        <td><span class="badge badge-pension">Pensión</span></td>
+        <td class="center"><span class="badge badge-gros">Gros</span></td>
+        <td class="dist-cell center">0.5 km<div class="dist-bar" style="width:10%"></div></td>
+        <td class="beds">Double room<br/>Private bathroom</td>
+        <td class="center"><span class="rating r-med">8.1</span></td>
+        <td class="features">&lt;100 m to Zurriola beach 🏄<br/>Family-run · warm hosts<br/>Coffee machine · fridge in hall</td>
+        <td class="price-total">€405</td>
+        <td class="col-a"><div class="price-val a">€203</div><div class="calc-note">405÷2</div></td>
+        <td class="col-b"><div class="price-val b">€135</div><div class="calc-note">405÷3</div></td>
+      </tr>
+
+      <!-- Hotel Punta Monpas -->
+      <tr data-capacity="2" data-type="hotel" data-neigh="gros"
+          data-dist="0.5" data-rating="0" data-total="510" data-pa="255" data-pb="170">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/punta-monpas.html" target="_blank">Hotel Punta Monpas</a></div>
+          <div class="prop-sub">Hotel ★★★</div>
+        </td>
+        <td><span class="badge badge-hotel">Hotel ★★★</span></td>
+        <td class="center"><span class="badge badge-gros">Gros</span></td>
+        <td class="dist-cell center">0.5 km<div class="dist-bar" style="width:10%"></div></td>
+        <td class="beds">Double room<br/>Sea &amp; mountain views 🌊</td>
+        <td class="center"><span class="rating r-none">—</span></td>
+        <td class="features">Right on Zurriola beach 🏖️<br/>Sea, Urgull &amp; Kursaal views<br/>Surfer bars nearby · WiFi</td>
+        <td class="price-total">€510</td>
+        <td class="col-a"><div class="price-val a">€255</div><div class="calc-note">510÷2</div></td>
+        <td class="col-b"><div class="price-val b">€170</div><div class="calc-note">510÷3</div></td>
+      </tr>
+
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="10">📍 Pick-up: Hotel María Cristina &nbsp;·&nbsp; 2-person: Group A = Total÷2 (3 nights) · Group B = Total÷3 (2 nights, −33%) &nbsp;·&nbsp; Distances estimated.</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — APARTMENTS
+══════════════════════════════════════════ -->
+<div class="section-banner banner-apart" id="apartBanner" style="margin-top:1.8rem">
+  <span class="icon">🏠</span>
+  <div>
+    <div class="title">Apartments</div>
+    <div class="sub">Shared space · cost split by nights present</div>
+  </div>
+  <span class="count-badge" id="apartCount">5 options</span>
+</div>
+
+<div class="main">
+  <div class="section-empty" id="apartEmpty">No apartment options match the current filters.</div>
+  <table class="tbl-apart" id="apartTable">
+    <thead>
+      <tr>
+        <th data-sort="name" data-tbl="apart">Property <span class="sort-icon"></span></th>
+        <th data-sort="cap" data-tbl="apart" class="center">For <span class="sort-icon"></span></th>
+        <th data-sort="neigh" data-tbl="apart" class="center">Area <span class="sort-icon"></span></th>
+        <th data-sort="dist" data-tbl="apart" class="center">Dist. pick-up <span class="sort-icon"></span></th>
+        <th>Rooms / Beds</th>
+        <th data-sort="rating" data-tbl="apart" class="center">Rating <span class="sort-icon"></span></th>
+        <th>Highlights</th>
+        <th data-sort="total" data-tbl="apart" class="center">Total<br/><span class="footnote">3 nights</span></th>
+        <th data-sort="price-a" data-tbl="apart" class="center col-a">Group A / pp<br/><span class="footnote">Faarya &amp; Ravi</span></th>
+        <th data-sort="price-b" data-tbl="apart" class="center col-b">Group B / pp<br/><span class="footnote">Ana &amp; Dany</span></th>
+      </tr>
+    </thead>
+    <tbody id="apartBody">
+
+      <!-- Beach & City Gros -->
+      <tr data-capacity="4" data-type="apartment" data-neigh="gros"
+          data-dist="0.7" data-rating="0" data-total="941" data-pa="314" data-pb="157">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/great-central-apartment.es.html" target="_blank">Beach &amp; City — Gros</a></div>
+          <div class="prop-sub">Neighbourhood of Gros</div>
+        </td>
+        <td class="center"><span class="badge badge-cap4">4 ppl</span></td>
+        <td class="center"><span class="badge badge-gros">Gros</span></td>
+        <td class="dist-cell center">0.7 km<div class="dist-bar" style="width:14%"></div></td>
+        <td class="beds">2 bed · 2 bath<br/>Balcony · city views</td>
+        <td class="center"><span class="rating r-none">—</span></td>
+        <td class="features">400 m to Zurriola 🏄<br/>1.1 km to La Concha<br/>WiFi · central Gros</td>
+        <td class="price-total">€941</td>
+        <td class="col-a"><div class="price-val a">€314</div><div class="calc-note">941÷3</div></td>
+        <td class="col-b"><div class="price-val b">€157</div><div class="calc-note">941÷6</div></td>
+      </tr>
+
+      <!-- Amara Acogedor -->
+      <tr data-capacity="4" data-type="apartment" data-neigh="amara"
+          data-dist="2.0" data-rating="0" data-total="872" data-pa="291" data-pb="145">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/apartamento-amara-estadio-anoeta-av-isabel-ii.html" target="_blank">Amara — Acogedor &amp; Céntrico</a></div>
+          <div class="prop-sub">Near Anoeta stadium</div>
+        </td>
+        <td class="center"><span class="badge badge-cap4">4 ppl</span></td>
+        <td class="center"><span class="badge badge-amara">Amara</span></td>
+        <td class="dist-cell center">2.0 km<div class="dist-bar" style="width:40%"></div></td>
+        <td class="beds">3 bed · 2 bath<br/>Balcony · free parking 🚗</td>
+        <td class="center"><span class="rating r-none">—</span></td>
+        <td class="features">Full kitchen · washing machine<br/>Free private parking<br/>Quiet residential area</td>
+        <td class="price-total">€872</td>
+        <td class="col-a"><div class="price-val a">€291</div><div class="calc-note">872÷3</div></td>
+        <td class="col-b"><div class="price-val b">€145</div><div class="calc-note">872÷6</div></td>
+      </tr>
+
+      <!-- Mundaiz FeelFree -->
+      <tr data-capacity="4" data-type="apartment" data-neigh="amara"
+          data-dist="2.5" data-rating="8.5" data-total="805" data-pa="268" data-pb="134">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/mundaiz-by-feelfree-rentals-donostia.es.html" target="_blank">Mundaiz — FeelFree Rentals</a></div>
+          <div class="prop-sub">FeelFree managed</div>
+        </td>
+        <td class="center"><span class="badge badge-cap4">4 ppl</span></td>
+        <td class="center"><span class="badge badge-amara">Amara</span></td>
+        <td class="dist-cell center">2.5 km<div class="dist-bar" style="width:50%"></div></td>
+        <td class="beds">2 bed + living room<br/>Walk-in shower · parquet</td>
+        <td class="center"><span class="rating r-med">8.5</span></td>
+        <td class="features">Washing machine · WiFi<br/>Kitchen: coffee + microwave<br/>Parquet floors throughout</td>
+        <td class="price-total">€805</td>
+        <td class="col-a"><div class="price-val a">€268</div><div class="calc-note">805÷3</div></td>
+        <td class="col-b"><div class="price-val b">€134</div><div class="calc-note">805÷6</div></td>
+      </tr>
+
+      <!-- Moraza Local Rentss -->
+      <tr data-capacity="4" data-type="apartment" data-neigh="centro"
+          data-dist="1.5" data-rating="0" data-total="1075" data-pa="358" data-pb="179">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/moraza-central-with-wifi.html" target="_blank">Moraza — Local Rentss</a></div>
+          <div class="prop-sub">Central location</div>
+        </td>
+        <td class="center"><span class="badge badge-cap4">4 ppl</span></td>
+        <td class="center"><span class="badge badge-centro">Centro</span></td>
+        <td class="dist-cell center">1.5 km<div class="dist-bar" style="width:30%"></div></td>
+        <td class="beds">3 bed · 2 bath<br/>Full kitchen</td>
+        <td class="center"><span class="rating r-none">—</span></td>
+        <td class="features">Kitchen: coffee, microwave, dishwasher<br/>~16 min walk to Zurriola<br/>WiFi · city centre</td>
+        <td class="price-total">€1,075</td>
+        <td class="col-a"><div class="price-val a">€358</div><div class="calc-note">1075÷3</div></td>
+        <td class="col-b"><div class="price-val b">€179</div><div class="calc-note">1075÷6</div></td>
+      </tr>
+
+      <!-- Aldako -->
+      <tr data-capacity="2" data-type="apartment" data-neigh="centro"
+          data-dist="1.5" data-rating="0" data-total="430" data-pa="215" data-pb="143">
+        <td>
+          <div class="prop-name"><a href="https://www.booking.com/hotel/es/apartamento-con-jardin-en-san-sebastian.html" target="_blank">Apartamento Aldako</a></div>
+          <div class="prop-sub">SanSe Holidays · 2 ppl</div>
+        </td>
+        <td class="center"><span class="badge badge-cap2">2 ppl</span></td>
+        <td class="center"><span class="badge badge-centro">Centro</span></td>
+        <td class="dist-cell center">1.5 km<div class="dist-bar" style="width:30%"></div></td>
+        <td class="beds">1 bed + living room<br/>1 bath · full kitchen</td>
+        <td class="center"><span class="rating r-none">—</span></td>
+        <td class="features">12 min walk to Zurriola &amp; Kursaal<br/>Dishwasher · coffee machine<br/>Near La Concha promenade</td>
+        <td class="price-total">€430</td>
+        <td class="col-a"><div class="price-val a">€215</div><div class="calc-note">430÷2</div></td>
+        <td class="col-b"><div class="price-val b">€143</div><div class="calc-note">430÷3</div></td>
+      </tr>
+
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="10">📍 Pick-up: Hotel María Cristina &nbsp;·&nbsp; 4-person: A = Total÷3 · B = Total÷6 &nbsp;·&nbsp; 2-person (Aldako): A = Total÷2 · B = Total÷3 &nbsp;·&nbsp; Distances estimated.</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<footer>Generated with Claude Code · May 2026 · San Sebastián 🌊</footer>
+
+<script>
+  const state = { neigh: 'all', sort: 'default' };
+
+  // ── Neighbourhood chips ───────────────────────
+  document.getElementById('neighFilter').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('#neighFilter .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    state.neigh = chip.dataset.val;
+    applyAll();
+  });
+
+  // ── Sort select ──────────────────────────────
+  document.getElementById('sortSelect').addEventListener('change', e => {
+    state.sort = e.target.value;
+    applyAll();
+  });
+
+  // ── Column header sort ───────────────────────
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sort;
+      const map = {
+        'total':   ['total-asc','total-desc'],
+        'price-a': ['price-a-asc','price-a-desc'],
+        'price-b': ['price-b-asc','price-b-desc'],
+        'dist':    ['dist-asc','dist-desc'],
+        'rating':  ['rating-desc','rating-desc'],
+      };
+      if (!map[key]) return;
+      const [asc, desc] = map[key];
+      state.sort = (state.sort === asc) ? desc : asc;
+      document.getElementById('sortSelect').value = state.sort;
+      document.querySelectorAll('th[data-sort]').forEach(t => t.classList.remove('sorted-asc','sorted-desc'));
+      th.classList.add(state.sort.endsWith('asc') ? 'sorted-asc' : 'sorted-desc');
+      applyAll();
+    });
+  });
+
+  function resetFilters() {
+    state.neigh = 'all'; state.sort = 'default';
+    document.querySelectorAll('#neighFilter .chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('#neighFilter .chip[data-val="all"]').classList.add('active');
+    document.getElementById('sortSelect').value = 'default';
+    document.querySelectorAll('th[data-sort]').forEach(t => t.classList.remove('sorted-asc','sorted-desc'));
+    applyAll();
+  }
+
+  const sortFns = {
+    'price-a-asc':  (a,b) => +a.dataset.pa    - +b.dataset.pa,
+    'price-a-desc': (a,b) => +b.dataset.pa    - +a.dataset.pa,
+    'price-b-asc':  (a,b) => +a.dataset.pb    - +b.dataset.pb,
+    'price-b-desc': (a,b) => +b.dataset.pb    - +a.dataset.pb,
+    'dist-asc':     (a,b) => +a.dataset.dist  - +b.dataset.dist,
+    'dist-desc':    (a,b) => +b.dataset.dist  - +a.dataset.dist,
+    'rating-desc':  (a,b) => +b.dataset.rating - +a.dataset.rating,
+    'total-asc':    (a,b) => +a.dataset.total  - +b.dataset.total,
+    'total-desc':   (a,b) => +b.dataset.total  - +a.dataset.total,
+  };
+
+  function applySection(bodyId, emptyId, bannerId, countId) {
+    const tbody  = document.getElementById(bodyId);
+    const rows   = Array.from(tbody.querySelectorAll('tr'));
+
+    const visible = rows.filter(r => state.neigh === 'all' || r.dataset.neigh === state.neigh);
+    if (sortFns[state.sort]) visible.sort(sortFns[state.sort]);
+
+    rows.forEach(r => { r.classList.add('hidden'); tbody.appendChild(r); });
+    visible.forEach(r => { r.classList.remove('hidden'); tbody.appendChild(r); });
+
+    const empty  = document.getElementById(emptyId);
+    const table  = tbody.closest('table');
+    empty.style.display  = visible.length === 0 ? 'block' : 'none';
+    table.style.display  = visible.length === 0 ? 'none'  : '';
+    document.getElementById(countId).textContent = `${visible.length} option${visible.length !== 1 ? 's' : ''}`;
+    return visible.length;
+  }
+
+  function applyAll() {
+    const h = applySection('hotelBody', 'hotelEmpty', 'hotelBanner', 'hotelCount');
+    const a = applySection('apartBody', 'apartEmpty', 'apartBanner', 'apartCount');
+    document.getElementById('resultsCount').textContent =
+      `Showing ${h + a} of 9 options`;
+  }
+
+  applyAll();
+</script>
+</body>
+</html>
