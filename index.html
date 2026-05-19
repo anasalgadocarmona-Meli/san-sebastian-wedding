@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -243,6 +243,26 @@
       </select>
     </div>
 
+    <div class="filter-group" style="min-width:150px">
+      <label>Max Group A / pp (€)</label>
+      <div style="display:flex;align-items:center;gap:0.4rem">
+        <input id="maxA" type="number" min="100" max="500" step="5" placeholder="no limit"
+          style="width:90px;border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.5rem;font-size:0.82rem;color:var(--navy);background:#fafafa;outline:none"
+          oninput="state.maxA=this.value?+this.value:Infinity;applyAll()" />
+        <span style="font-size:0.75rem;color:var(--dark-rose);font-weight:700" id="maxALabel"></span>
+      </div>
+    </div>
+
+    <div class="filter-group" style="min-width:150px">
+      <label>Max Group B / pp (€)</label>
+      <div style="display:flex;align-items:center;gap:0.4rem">
+        <input id="maxB" type="number" min="50" max="300" step="5" placeholder="no limit"
+          style="width:90px;border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.5rem;font-size:0.82rem;color:var(--navy);background:#fafafa;outline:none"
+          oninput="state.maxB=this.value?+this.value:Infinity;applyAll()" />
+        <span style="font-size:0.75rem;color:var(--sage);font-weight:700" id="maxBLabel"></span>
+      </div>
+    </div>
+
     <button class="reset-btn" onclick="resetFilters()">✕ Reset</button>
   </div>
   <div class="results-count" id="resultsCount">Showing all 9 options</div>
@@ -258,7 +278,7 @@
     <div class="title">Hotels &amp; Pensiones</div>
     <div class="sub">Individual rooms · each pair books separately · 2-person pricing</div>
   </div>
-  <span class="count-badge" id="hotelCount">4 options</span>
+  <span class="count-badge" id="hotelCount">3 options</span>
 </div>
 
 <div class="main">
@@ -296,24 +316,6 @@
         <td class="price-total">€511</td>
         <td class="col-a"><div class="price-val a">€256</div><div class="calc-note">511÷2</div></td>
         <td class="col-b"><div class="price-val b">€170</div><div class="calc-note">511÷3</div></td>
-      </tr>
-
-      <!-- Enjoy Comfort -->
-      <tr data-capacity="2" data-type="other" data-neigh="gros"
-          data-dist="1.0" data-rating="8.4" data-total="520" data-pa="260" data-pb="173">
-        <td>
-          <div class="prop-name"><a href="https://www.booking.com/hotel/es/enjoy-comfort.html" target="_blank">Enjoy Comfort</a></div>
-          <div class="prop-sub">Guest House</div>
-        </td>
-        <td><span class="badge badge-pension">Guest House</span></td>
-        <td class="center"><span class="badge badge-gros">Gros</span></td>
-        <td class="dist-cell center">1.0 km<div class="dist-bar" style="width:20%"></div></td>
-        <td class="beds">Double room<br/>Shared bathroom · parquet</td>
-        <td class="center"><span class="rating r-high">8.4</span></td>
-        <td class="features">5 min walk to beach 🏖️<br/>10 min to La Concha Bay<br/>Shared lounge · WiFi</td>
-        <td class="price-total">€520</td>
-        <td class="col-a"><div class="price-val a">€260</div><div class="calc-note">520÷2</div></td>
-        <td class="col-b"><div class="price-val b">€173</div><div class="calc-note">520÷3</div></td>
       </tr>
 
       <!-- Pensión Atxiki -->
@@ -495,7 +497,7 @@
 <footer>Generated with Claude Code · May 2026 · San Sebastián 🌊</footer>
 
 <script>
-  const state = { neigh: 'all', sort: 'default' };
+  const state = { neigh: 'all', sort: 'default', maxA: Infinity, maxB: Infinity };
 
   // ── Neighbourhood chips ───────────────────────
   document.getElementById('neighFilter').addEventListener('click', e => {
@@ -535,10 +537,12 @@
   });
 
   function resetFilters() {
-    state.neigh = 'all'; state.sort = 'default';
+    state.neigh = 'all'; state.sort = 'default'; state.maxA = Infinity; state.maxB = Infinity;
     document.querySelectorAll('#neighFilter .chip').forEach(c => c.classList.remove('active'));
     document.querySelector('#neighFilter .chip[data-val="all"]').classList.add('active');
     document.getElementById('sortSelect').value = 'default';
+    document.getElementById('maxA').value = '';
+    document.getElementById('maxB').value = '';
     document.querySelectorAll('th[data-sort]').forEach(t => t.classList.remove('sorted-asc','sorted-desc'));
     applyAll();
   }
@@ -559,7 +563,12 @@
     const tbody  = document.getElementById(bodyId);
     const rows   = Array.from(tbody.querySelectorAll('tr'));
 
-    const visible = rows.filter(r => state.neigh === 'all' || r.dataset.neigh === state.neigh);
+    const visible = rows.filter(r => {
+      if (state.neigh !== 'all' && r.dataset.neigh !== state.neigh) return false;
+      if (+r.dataset.pa > state.maxA) return false;
+      if (+r.dataset.pb > state.maxB) return false;
+      return true;
+    });
     if (sortFns[state.sort]) visible.sort(sortFns[state.sort]);
 
     rows.forEach(r => { r.classList.add('hidden'); tbody.appendChild(r); });
@@ -577,10 +586,11 @@
     const h = applySection('hotelBody', 'hotelEmpty', 'hotelBanner', 'hotelCount');
     const a = applySection('apartBody', 'apartEmpty', 'apartBanner', 'apartCount');
     document.getElementById('resultsCount').textContent =
-      `Showing ${h + a} of 9 options`;
+      `Showing ${h + a} of 8 options`;
   }
 
   applyAll();
 </script>
 </body>
 </html>
+
